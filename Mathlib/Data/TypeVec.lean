@@ -68,10 +68,12 @@ instance Arrow.inhabited (α β : TypeVec n) [∀ i, Inhabited (β i)] : Inhabit
   ⟨fun _ _ => default⟩
 
 /-- identity of arrow composition -/
+@[inline]
 def id {α : TypeVec n} : α ⟹ α := fun _ x => x
 
 
 /-- arrow composition in the category of `TypeVec` -/
+@[inline]
 def comp (g : β ⟹ γ) (f : α ⟹ β)
     : α ⟹ γ :=
   fun i x => g i (f i x)
@@ -93,6 +95,7 @@ theorem comp_assoc
 end
 
 /-- Support for extending a `TypeVec` by one element. -/
+@[macro_inline]
 def append1 (α : TypeVec n) (β : Type*) : TypeVec (n + 1)
   | Fin2.fs i => α i
   | Fin2.fz => β
@@ -100,9 +103,11 @@ def append1 (α : TypeVec n) (β : Type*) : TypeVec (n + 1)
 @[inherit_doc] infixl:67 " ::: " => append1
 
 /-- retain only a `n-length` prefix of the argument -/
+@[inline]
 def drop (α : TypeVec.{u} (n + 1)) : TypeVec n := fun i => α i.fs
 
 /-- take the last value of a `(n+1)-length` vector -/
+@[inline]
 def last (α : TypeVec.{u} (n + 1)) : Type _ :=
   α Fin2.fz
 
@@ -133,11 +138,13 @@ theorem append1_cases_append1 {C : TypeVec (n + 1) → Sort u} (H : ∀ α β, C
   rfl
 
 /-- append an arrow and a function for arbitrary source and target type vectors -/
+@[macro_inline]
 def splitFun {α α' : TypeVec (n + 1)} (f : drop α ⟹ drop α') (g : last α → last α') : α ⟹ α'
   | Fin2.fs i => f i
   | Fin2.fz => g
 
 /-- append an arrow and a function as well as their respective source and target types / typevecs -/
+@[macro_inline]
 def appendFun {α α' : TypeVec n} {β β' : Type*} (f : α ⟹ α') (g : β → β') :
     append1 α β ⟹ append1 α' β' :=
   splitFun f g
@@ -145,13 +152,16 @@ def appendFun {α α' : TypeVec n} {β β' : Type*} (f : α ⟹ α') (g : β →
 @[inherit_doc] infixl:0 " ::: " => appendFun
 
 /-- split off the prefix of an arrow -/
+@[inline]
 def dropFun {α β : TypeVec (n + 1)} (f : α ⟹ β) : drop α ⟹ drop β := fun i => f i.fs
 
 /-- split off the last function of an arrow -/
+@[inline]
 def lastFun {α β : TypeVec (n + 1)} (f : α ⟹ β) : last α → last β :=
   f Fin2.fz
 
 /-- arrow in the category of `0-length` vectors -/
+@[inline]
 def nilFun {α : TypeVec 0} {β : TypeVec 0} : α ⟹ β := fun i => by apply Fin2.elim0 i
 
 theorem eq_of_drop_last_eq {α β : TypeVec (n + 1)} {f g : α ⟹ β} (h₀ : dropFun f = dropFun g)
@@ -167,10 +177,12 @@ theorem dropFun_splitFun {α α' : TypeVec (n + 1)} (f : drop α ⟹ drop α') (
   rfl
 
 /-- turn an equality into an arrow -/
+@[inline]
 def Arrow.mp {α β : TypeVec n} (h : α = β) : α ⟹ β
   | _ => Eq.mp (congr_fun h _)
 
 /-- turn an equality into an arrow, with reverse direction -/
+@[inline]
 def Arrow.mpr {α β : TypeVec n} (h : α = β) : β ⟹ α
   | _ => Eq.mpr (congr_fun h _)
 
@@ -346,11 +358,13 @@ section Liftp'
 open Nat
 
 /-- `repeat n t` is a `n-length` type vector that contains `n` occurrences of `t` -/
+@[inline]
 def «repeat» : ∀ (n : ℕ), Type u → TypeVec n
   | 0, _ => Fin2.elim0
   | Nat.succ i, t => append1 («repeat» i t) t
 
 /-- `prod α β` is the pointwise product of the components of `α` and `β` -/
+@[inline]
 def prod : ∀ {n}, TypeVec.{u} n → TypeVec.{u} n → TypeVec n
   | 0, _, _ => Fin2.elim0
   | n + 1, α, β => (@prod n (drop α) (drop β)) ::: (last α × last β)
@@ -359,6 +373,7 @@ def prod : ∀ {n}, TypeVec.{u} n → TypeVec.{u} n → TypeVec n
 
 /-- `const x α` is an arrow that ignores its source and constructs a `TypeVec` that
 contains nothing but `x` -/
+@[inline]
 protected def const {β} (x : β) : ∀ {n} (α : TypeVec n), α ⟹ «repeat» _ β
   | succ _, α, Fin2.fs _ => TypeVec.const x (drop α) _
   | succ _, _, Fin2.fz => fun _ => x
@@ -404,6 +419,7 @@ def RelLast' (α : TypeVec n) {β : Type*} (p : β → β → Prop) :
 
 /-- given `F : TypeVec.{u} (n+1) → Type u`, `curry F : Type u → TypeVec.{u} → Type u`,
 i.e. its first argument can be fed in separately from the rest of the vector of arguments -/
+@[inline]
 def Curry (F : TypeVec.{u} (n + 1) → Type*) (α : Type u) (β : TypeVec.{u} n) : Type _ :=
   F (β ::: α)
 
